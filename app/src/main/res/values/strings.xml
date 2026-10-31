@@ -1,3 +1,25 @@
 <resources>
-    <string name="app_name">Ma_Calculatrice</string>
+    <string name="app_name">Ma Calculatrice</string>
+    <string name="title_standard">Calculatrice Standard</string>
+    <string name="title_scientific">Calculatrice Scientifique</string>
+    <string name="title_devise">Convertisseur Devises</string>
+
+    <string name="menu_standard">Standard</string>
+    <string name="menu_scientific">Scientifique</string>
+    <string name="menu_devise">Devise</string>
+    <string name="menu_settings">Paramètres</string>
+    <string name="menu_about">À propos</string>
+
+    <string name="toast_standard">Mode Standard activé</string>
+    <string name="toast_scientific">Mode Scientifique activé</string>
+    <string name="toast_devise">Mode Devise (Convertisseur)</string>
+    <string name="toast_settings">Paramètres de l\'application</string>
+    <string name="toast_about">Ma Calculatrice v1.0 - ENSAF</string>
+
+    <string name="navigation_drawer_open">Ouvrir le menu</string>
+    <string name="navigation_drawer_close">Fermer le menu</string>
+    <string name="header_title">Ma Calculatrice</string>
+    <string name="header_subtitle">Calculatrice Standard &amp; Scientifique</string>
+    <string name="group_modes">Modes de Calcul</string>
+    <string name="group_options">Options</string>
 </resources>
