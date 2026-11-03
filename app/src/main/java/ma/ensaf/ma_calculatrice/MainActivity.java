@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +25,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TextView tvDisplay;
     private TextView tvExpression;
     private LinearLayout layoutScientific;
+    private LinearLayout layoutStandardContainer;
+    private LinearLayout layoutGraphical;
+
+    private EditText etFunction;
+    private Button btnPlot;
+    private GraphView graphView;
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -47,13 +55,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         layoutScientific = findViewById(R.id.layoutScientific);
+        layoutStandardContainer = findViewById(R.id.layoutStandardContainer);
+        layoutGraphical = findViewById(R.id.layoutGraphical);
 
+        etFunction = findViewById(R.id.etFunction);
+        btnPlot = findViewById(R.id.btnPlot);
+        graphView = findViewById(R.id.graphView);
+
+        btnPlot.setOnClickListener(v -> {
+            String formula = etFunction.getText().toString().trim();
+            if (!formula.isEmpty()) {
+                graphView.setFunctionFormula(formula);
+            }
+        });
+
+        findViewById(R.id.btnPresetSin).setOnClickListener(v -> {
+            etFunction.setText("sin(x)");
+            graphView.setFunctionFormula("sin(x)");
+        });
+        findViewById(R.id.btnPresetCos).setOnClickListener(v -> {
+            etFunction.setText("cos(x)");
+            graphView.setFunctionFormula("cos(x)");
+        });
+        findViewById(R.id.btnPresetSquare).setOnClickListener(v -> {
+            etFunction.setText("x^2");
+            graphView.setFunctionFormula("x^2");
+        });
+        findViewById(R.id.btnPresetSqrt).setOnClickListener(v -> {
+            etFunction.setText("sqrt(x)");
+            graphView.setFunctionFormula("sqrt(x)");
+        });
 
         toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
-
 
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -108,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
@@ -118,41 +153,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.calc_standard) {
-            layoutScientific.setVisibility(View.GONE);
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Calculatrice Standard");
-            }
-            return true;
-        } else if (id == R.id.calc_scientific) {
-            layoutScientific.setVisibility(View.VISIBLE);
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Calculatrice Scientifique");
-            }
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return selectCalculatorMode(id) || super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        int id = menuItem.getItemId();
-        if (id == R.id.calc_standard) {
+        selectCalculatorMode(menuItem.getItemId());
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private boolean selectCalculatorMode(int itemId) {
+        if (itemId == R.id.calc_standard) {
+            layoutGraphical.setVisibility(View.GONE);
+            layoutStandardContainer.setVisibility(View.VISIBLE);
             layoutScientific.setVisibility(View.GONE);
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle("Calculatrice Standard");
             }
             Toast.makeText(this, "Mode Standard activé", Toast.LENGTH_SHORT).show();
-        } else if (id == R.id.calc_scientific) {
+            return true;
+        } else if (itemId == R.id.calc_scientific) {
+            layoutGraphical.setVisibility(View.GONE);
+            layoutStandardContainer.setVisibility(View.VISIBLE);
             layoutScientific.setVisibility(View.VISIBLE);
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle("Calculatrice Scientifique");
             }
             Toast.makeText(this, "Mode Scientifique activé", Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (itemId == R.id.calc_graphical) {
+            layoutStandardContainer.setVisibility(View.GONE);
+            layoutScientific.setVisibility(View.GONE);
+            layoutGraphical.setVisibility(View.VISIBLE);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Calculatrice Graphique");
+            }
+            Toast.makeText(this, "Mode Graphique activé", Toast.LENGTH_SHORT).show();
+            return true;
         }
-
-        drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
+        return false;
     }
 
     private void setupDigitButton(int buttonId, String digit) {
@@ -211,7 +251,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String currentText = tvDisplay.getText().toString();
         if (currentText.isEmpty() || currentText.equals("Erreur")) return;
 
-        // Évaluation de la fonction scientifique en attente (ex: tan puis 6 puis =)
         if (!pendingFunction.isEmpty()) {
             try {
                 double value = Double.parseDouble(currentText);
@@ -277,7 +316,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void applyFunction(String function) {
         String currentText = tvDisplay.getText().toString();
 
-        // Si l'utilisateur clique d'abord sur la fonction (ex: tan puis 6)
         if (isNewOperation || currentText.equals("0")) {
             pendingFunction = function;
             tvExpression.setText(function + "(");
@@ -285,7 +323,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
 
-        // Si l'utilisateur a déjà tapé un nombre (ex: 6 puis tan)
         try {
             double value = Double.parseDouble(currentText);
             double result = evaluateMathFunction(function, value);
@@ -336,7 +373,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private String formatResult(double result) {
-        // Arrondir les imprécisions des décimales (ex: sin(30) -> 0.5, cos(90) -> 0)
         if (Math.abs(result) < 1e-12) {
             result = 0;
         } else {
