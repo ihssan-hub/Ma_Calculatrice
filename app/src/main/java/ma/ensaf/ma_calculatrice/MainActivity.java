@@ -316,6 +316,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void applyFunction(String function) {
         String currentText = tvDisplay.getText().toString();
 
+        double val = 0;
+        try {
+            val = Double.parseDouble(currentText);
+        } catch (Exception ignored) {}
+
+        // cos(0), tan(0), et √(0) doivent afficher Erreur
+        if (val == 0 && (function.equals("cos") || function.equals("tan") || function.equals("√"))) {
+            tvExpression.setText(function + "(0)");
+            tvDisplay.setText("Erreur");
+            pendingFunction = "";
+            isNewOperation = true;
+            return;
+        }
+
         if (isNewOperation || currentText.equals("0")) {
             pendingFunction = function;
             tvExpression.setText(function + "(");
@@ -327,7 +341,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             double value = Double.parseDouble(currentText);
             double result = evaluateMathFunction(function, value);
             if (Double.isNaN(result)) {
+                tvExpression.setText(function + "(" + currentText + ")");
                 tvDisplay.setText("Erreur");
+                pendingFunction = "";
+                isNewOperation = true;
                 return;
             }
             tvExpression.setText(function + "(" + currentText + ")");
@@ -344,14 +361,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case "sin":
                 return Math.sin(Math.toRadians(value));
             case "cos":
+                if (value == 0) {
+                    return Double.NaN;
+                }
                 return Math.cos(Math.toRadians(value));
             case "tan":
-                if (Math.abs(value % 180) == 90) {
+                if (value == 0 || Math.abs(value % 180) == 90) {
                     return Double.NaN;
                 }
                 return Math.tan(Math.toRadians(value));
             case "√":
-                if (value < 0) {
+                if (value <= 0) {
                     return Double.NaN;
                 }
                 return Math.sqrt(value);
